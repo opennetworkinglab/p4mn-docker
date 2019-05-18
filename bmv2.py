@@ -17,7 +17,6 @@ limitations under the License.
 import json
 import multiprocessing
 import os
-import random
 import socket
 import sys
 import threading
@@ -121,7 +120,7 @@ class ONOSBmv2Switch(Switch):
 
     def __init__(self, name, json=None, debugger=False, loglevel="warn",
                  elogger=False, cpuport=255, notifications=False,
-                 thriftport=None, dryrun=False,
+                 thrift=False, dryrun=False,
                  pipeconf=DEFAULT_PIPECONF, pktdump=False, valgrind=False,
                  gnmi=False, portcfg=True, onosdevid=None, stratum=False,
                  **kwargs):
@@ -129,7 +128,10 @@ class ONOSBmv2Switch(Switch):
         self.grpcPort = ONOSBmv2Switch.nextGrpcPort
         ONOSBmv2Switch.nextGrpcPort += 1
         self.grpcPortInternal = None  # Needed for Stratum (local_hercules_url)
-        self.thriftPort = thriftport
+        if not thrift:
+            self.thriftPort = None
+        else:
+            raise Exception("Support for thrift not implemented")
         self.cpuPort = cpuport
         self.json = json
         self.useStratum = parseBoolean(stratum)
@@ -240,7 +242,7 @@ nodes {{
 
     def doOnosNetcfg(self):
         """
-        Notifies ONOS about the new device via Netcfg.
+        Writes ONOS netcfg file for this switch.
         """
 
         cfgData = {
@@ -260,9 +262,8 @@ nodes {{
         # Remove files from previous executions (if we are restarting)
         self.cleanupTmpFiles()
 
-        if self.grpcPort is None:
-            self.grpcPort = pickUnusedPort()
-        writeToFile("/tmp/bmv2-%s-grpc-port" % self.name, self.grpcPort)
+        if self.grpcPort:
+            writeToFile("/tmp/bmv2-%s-grpc-port" % self.name, self.grpcPort)
 
         if self.useStratum:
             config_dir = "/tmp/bmv2-%s-stratum" % self.name
@@ -273,9 +274,8 @@ nodes {{
                 self.grpcPortInternal = pickUnusedPort()
             cmdString = self.getStratumCmdString(config_dir)
         else:
-            if self.thriftPort is None:
-                self.thriftPort = pickUnusedPort()
-            writeToFile("/tmp/bmv2-%s-thrift-port" % self.name, self.thriftPort)
+            if self.thriftPort:
+                writeToFile("/tmp/bmv2-%s-thrift-port" % self.name, self.thriftPort)
             cmdString = self.getBmv2CmdString()
 
         if self.dryrun:
@@ -331,7 +331,8 @@ nodes {{
         for port, intf in self.intfs.items():
             if not intf.IP():
                 args.append('-i %d@%s' % (port, intf.name))
-        args.append('--thrift-port %s' % self.thriftPort)
+        if self.thriftPort:
+            args.append('--thrift-port %s' % self.thriftPort)
         if self.notifications:
             ntfaddr = 'ipc:///tmp/bmv2-%s-notifications.ipc' % self.name
             args.append('--notifications-addr %s' % ntfaddr)
@@ -388,16 +389,6 @@ nodes {{
                     print "..."
                 for line in lines[-BMV2_LOG_LINES:]:
                     print line.rstrip()
-
-    @staticmethod
-    def controllerIp(controllers):
-        try:
-            # onos.py
-            clist = controllers[0].nodes()
-        except AttributeError:
-            clist = controllers
-        assert len(clist) > 0
-        return random.choice(clist).IP()
 
     def killBmv2(self, log=False):
         self.stopped = True
