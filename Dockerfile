@@ -9,6 +9,17 @@ ARG JOBS=2
 # to a new image with runtime dependencies.
 FROM bitnami/minideb:stretch as builder
 
+ARG GRPC_VER
+ARG PI_COMMIT
+ARG PI_CONFIGURE_FLAGS
+ARG BMV2_COMMIT
+ARG BMV2_CONFIGURE_FLAGS
+ARG JOBS
+
+RUN echo "--- gRPC v$GRPC_VER"
+RUN echo "--- PI $PI_COMMIT - $PI_CONFIGURE_FLAGS"
+RUN echo "--- BMv2 $BMV2_COMMIT - $BMV2_CONFIGURE_FLAGS"
+
 ENV BUILD_DEPS \
     autoconf \
     automake \
@@ -39,9 +50,6 @@ ENV BUILD_DEPS \
     unzip
 RUN install_packages $BUILD_DEPS
 
-ARG GRPC_VER
-ARG JOBS
-
 # Install protobuf and grpc.
 RUN git clone https://github.com/grpc/grpc.git /tmp/grpc && \
     cd /tmp/grpc && git fetch --tags && git checkout v$GRPC_VER
@@ -60,9 +68,6 @@ RUN make -j$JOBS
 RUN make install
 RUN ldconfig
 
-ARG PI_COMMIT
-ARG PI_CONFIGURE_FLAGS
-
 # Build PI
 RUN git clone https://github.com/p4lang/PI.git /tmp/PI && \
     cd /tmp/PI && git checkout ${PI_COMMIT}
@@ -73,9 +78,6 @@ RUN ./configure $PI_CONFIGURE_FLAGS
 RUN make -j${JOBS}
 RUN make install
 RUN ldconfig
-
-ARG BMV2_COMMIT
-ARG BMV2_CONFIGURE_FLAGS
 
 # Build simple_switch
 RUN git clone https://github.com/p4lang/behavioral-model.git /tmp/bmv2 && \

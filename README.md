@@ -3,17 +3,11 @@
 Docker image that can execute a mininet emulated network of BMv2 virtual
 switches, controlled by an external SDN controller via P4Runtime.
 
-## Build image
-
-To build this image:
-
-    docker build -t p4mn .
-
 ## Run container
 
 To run the container:
 
-    docker run --privileged --rm -it p4mn [MININET ARGS]
+    docker run --privileged --rm -it opennetworking/p4mn [MININET ARGS]
 
 After running this command, you should see the mininet CLI (`mininet>`).
 
@@ -29,7 +23,7 @@ documentation.
 
 For example, to run a linear topology with 3 switches:
 
-    docker run --privileged --rm -it p4mn --topo linear,3
+    docker run --privileged --rm -it opennetworking/p4mn --topo linear,3
 
 ### P4Runtime server ports
 
@@ -40,7 +34,7 @@ ports.
 
 For example, when running a topology with 3 switches:
 
-     docker run --privileged --rm -it -p 50001-50003:50001-50003 p4mn --topo linear,3
+     docker run --privileged --rm -it -p 50001-50003:50001-50003 opennetworking/p4mn --topo linear,3
 
 ### BMv2 logs and other temporary files
 
@@ -48,7 +42,7 @@ To allow easier access to BMv2 logs and other files, we suggest sharing the
 `/tmp` directory inside the container on the host system using the docker run
 `-v` option, for example:
 
-    docker run ... -v /tmp/p4mn:/tmp ... p4mn ...
+    docker run ... -v /tmp/p4mn:/tmp ... opennetworking/p4mn ...
 
 By using this option, during the container execution, a number of files related
 to the execution of the BMv2 switches will be available under `/tmp/p4mn` in the

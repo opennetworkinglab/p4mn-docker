@@ -5,9 +5,9 @@ services:
 
 env:
   global:
-    - BMV2_BASE_FLAGS=--with-pi --disable-elogger --without-nanomsg --without-thrift
-    - BMV2_NO_LOGGING_FLAGS=--disable-logging-macros
-    - PI_CONFIGURE_FLAGS=--with-proto
+    - BMV2_BASE_FLAGS="--with-pi --disable-elogger --without-nanomsg --without-thrift"
+    - BMV2_NO_LOGGING_FLAGS="--disable-logging-macros"
+    - PI_CONFIGURE_FLAGS="--with-proto"
     - GRPC_VER=1.19.1
     - STABLE_PI_COMMIT=9f6c1f2
     - STABLE_BMV2_COMMIT=8c6f852
@@ -20,7 +20,7 @@ env:
     - LABEL=latest-no-logging
       PI_COMMIT=master
       BMV2_COMMIT=master
-      BMV2_CONFIGURE_FLAGS=$BMV2_BASE_FLAGS $BMV2_NO_LOGGING_FLAGS
+      BMV2_CONFIGURE_FLAGS="$BMV2_BASE_FLAGS $BMV2_NO_LOGGING_FLAGS"
       TRAVIS_ALLOW_FAILURE=true
     - LABEL=stable
       PI_COMMIT=$STABLE_PI_COMMIT
@@ -30,7 +30,7 @@ env:
     - LABEL=stable-no-logging
       PI_COMMIT=$STABLE_PI_COMMIT
       BMV2_COMMIT=$STABLE_BMV2_COMMIT
-      BMV2_CONFIGURE_FLAGS=$BMV2_BASE_FLAGS $BMV2_NO_LOGGING_FLAGS
+      BMV2_CONFIGURE_FLAGS="$BMV2_BASE_FLAGS $BMV2_NO_LOGGING_FLAGS"
       TRAVIS_ALLOW_FAILURE=false
 
 script:
@@ -43,3 +43,10 @@ script:
     --build-arg BMV2_CONFIGURE_FLAGS="$BMV2_CONFIGURE_FLAGS" .
   - docker run --rm --entrypoint simple_switch_grpc p4mn-$LABEL --help
   - docker run --rm --entrypoint mn p4mn-$LABEL --help
+  - docker tag p4mn-$LABEL $DOCKER_REPO:$LABEL
+
+deploy:
+  provider: script
+  script: bash docker_push $DOCKER_REPO:$LABEL
+  on:
+    branch: master
