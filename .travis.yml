@@ -5,12 +5,44 @@ services:
 
 env:
   global:
-    CACHE_IMAGE: ccasconeonf/p4mn:latest
+    - BMV2_BASE_FLAGS=--with-pi --disable-elogger --without-nanomsg --without-thrift
+    - BMV2_NO_LOGGING_FLAGS=--disable-logging-macros
+    - PI_CONFIGURE_FLAGS=--with-proto
+    - GRPC_VER=1.19.1
+    - STABLE_PI_COMMIT=9f6c1f2
+    - STABLE_BMV2_COMMIT=8c6f852
+  matrix:
+    - LABEL=latest
+      PI_COMMIT=master
+      BMV2_COMMIT=master
+      BMV2_CONFIGURE_FLAGS=$BMV2_BASE_FLAGS
+      TRAVIS_ALLOW_FAILURE=true
+    - LABEL=latest-no-logging
+      PI_COMMIT=master
+      BMV2_COMMIT=master
+      BMV2_CONFIGURE_FLAGS=$BMV2_BASE_FLAGS $BMV2_NO_LOGGING_FLAGS
+      TRAVIS_ALLOW_FAILURE=true
+    - LABEL=stable
+      PI_COMMIT=$STABLE_PI_COMMIT
+      BMV2_COMMIT=$STABLE_BMV2_COMMIT
+      BMV2_CONFIGURE_FLAGS=$BMV2_BASE_FLAGS
+      TRAVIS_ALLOW_FAILURE=false
+    - LABEL=stable-no-logging
+      PI_COMMIT=$STABLE_PI_COMMIT
+      BMV2_COMMIT=$STABLE_BMV2_COMMIT
+      BMV2_CONFIGURE_FLAGS=$BMV2_BASE_FLAGS $BMV2_NO_LOGGING_FLAGS
+      TRAVIS_ALLOW_FAILURE=false
 
-before_script:
-  - docker pull $CACHE_IMAGE:latest || true
-
-script:
-  - docker build -t p4mn-local .
-  - docker run --rm --entrypoint simple_switch_grpc p4mn-local --help
-  - docker run --rm --entrypoint mn p4mn-local --help
+jobs:
+  include:
+    - stage: build
+    - script: >
+        docker build
+        -t p4mn-$LABEL
+        --build-arg PI_COMMIT=$PI_COMMIT
+        --build-arg BMV2_COMMIT=$BMV2_COMMIT
+        --build-arg PI_CONFIGURE_FLAGS="$PI_CONFIGURE_FLAGS"
+        --build-arg BMV2_CONFIGURE_FLAGS="$BMV2_CONFIGURE_FLAGS"
+    - stage: test
+    - script: docker run --rm --entrypoint simple_switch_grpc p4mn-local --help
+    - script: docker run --rm --entrypoint mn p4mn-local --help

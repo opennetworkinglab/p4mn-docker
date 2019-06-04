@@ -1,8 +1,8 @@
 ARG GRPC_VER=1.19.1
-ARG PI_COMMIT=9f6c1f2
-ARG BMV2_COMMIT=8c6f852
-ARG BMV2_CONFIG_FLAGS="--with-pi --disable-elogger --without-nanomsg --without-thrift"
-ARG PI_CONFIG_FLAGS="--with-proto"
+ARG PI_COMMIT=master
+ARG BMV2_COMMIT=master
+ARG BMV2_CONFIGURE_FLAGS="--with-pi --disable-elogger --without-nanomsg --without-thrift"
+ARG PI_CONFIGURE_FLAGS="--with-proto"
 ARG JOBS=2
 
 # We use a 2-stage build. Build everything then copy only the strict necessary
@@ -61,7 +61,7 @@ RUN make install
 RUN ldconfig
 
 ARG PI_COMMIT
-ARG PI_CONFIG_FLAGS
+ARG PI_CONFIGURE_FLAGS
 
 # Build PI
 RUN git clone https://github.com/p4lang/PI.git /tmp/PI && \
@@ -69,13 +69,13 @@ RUN git clone https://github.com/p4lang/PI.git /tmp/PI && \
 WORKDIR /tmp/PI
 RUN git submodule update --init --recursive
 RUN ./autogen.sh
-RUN ./configure $PI_CONFIG_FLAGS
+RUN ./configure $PI_CONFIGURE_FLAGS
 RUN make -j${JOBS}
 RUN make install
 RUN ldconfig
 
 ARG BMV2_COMMIT
-ARG BMV2_CONFIG_FLAGS
+ARG BMV2_CONFIGURE_FLAGS
 
 # Build simple_switch
 RUN git clone https://github.com/p4lang/behavioral-model.git /tmp/bmv2 && \
@@ -83,7 +83,7 @@ RUN git clone https://github.com/p4lang/behavioral-model.git /tmp/bmv2 && \
 WORKDIR /tmp/bmv2
 RUN ./autogen.sh
 # Build only simple_switch and simple_switch_grpc
-RUN ./configure $BMV2_CONFIG_FLAGS \
+RUN ./configure $BMV2_CONFIGURE_FLAGS \
     --without-targets CPPFLAGS="-I${PWD}/targets/simple_switch -DWITH_SIMPLE_SWITCH"
 RUN make -j${JOBS}
 RUN make install
@@ -146,7 +146,19 @@ FROM bitnami/minideb:stretch as runtime
 LABEL maintainer="Carmelo Cascone <carmelo@opennetworking.org>"
 LABEL description="P4Runtime-enabled Mininet that uses BMv2 simple_switch_grpc as the default switch"
 
-# Mininet and BMv2 simple_switch runtime dependencies
+ARG GRPC_VER
+ARG PI_COMMIT
+ARG PI_CONFIGURE_FLAGS
+ARG BMV2_COMMIT
+ARG BMV2_CONFIGURE_FLAGS
+
+LABEL grpc-version="$GRPC_VER"
+LABEL pi-commit="$PI_COMMIT"
+LABEL bmv2-commit="$BMV2_COMMIT"
+LABEL pi-configure-flags="$PI_CONFIGURE_FLAGS"
+LABEL bmv2-configure-flags="$BMV2_CONFIGURE_FLAGS"
+
+# Mininet and BMv2 runtime dependencies.
 ENV RUNTIME_DEPS \
     iproute2 \
     iputils-ping \
