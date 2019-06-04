@@ -1,0 +1,14 @@
+sudo: required
+
+services:
+  - docker
+
+env:
+  global:
+    CACHE_IMAGE: ccasconeonf/p4mn:latest
+
+before_script:
+  - docker pull $CACHE_IMAGE:latest || true
+
+script:
+  - docker build --cache-from $CACHE_IMAGE:latest .

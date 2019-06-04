@@ -1,2 +1,2 @@
-.idea
-*.iml
+*
+!bmv2.py
