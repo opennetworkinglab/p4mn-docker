@@ -69,7 +69,7 @@ RUN git clone https://github.com/p4lang/behavioral-model.git /tmp/bmv2 && \
     cd /tmp/bmv2 && git checkout $BMV2_COMMIT && \
     ./autogen.sh && \
     ./configure --with-pi --disable-elogger --without-nanomsg --without-targets \
-        --disable-logging-macros --without-thrift \
+        --without-thrift \
         CPPFLAGS="-I$PWD/targets/simple_switch -DWITH_SIMPLE_SWITCH" && \
     make -j$(nproc) && make install && ldconfig && \
     cd targets/simple_switch && make -j$(nproc) && make install && ldconfig && \
