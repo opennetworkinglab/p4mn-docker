@@ -11,6 +11,6 @@ before_script:
   - docker pull $CACHE_IMAGE:latest || true
 
 script:
-  - docker build --cache-from $CACHE_IMAGE:latest -t p4mn-local .
+  - docker build -t p4mn-local .
   - docker run --rm --entrypoint simple_switch_grpc p4mn-local --help
   - docker run --rm --entrypoint mn p4mn-local --help

@@ -1,7 +1,7 @@
 ARG GRPC_VER=1.19.1
 ARG PI_COMMIT=9f6c1f2
 ARG BMV2_COMMIT=8c6f852
-ARG BMV2_CONFIG_FLAGS="--with-pi --disable-elogger --without-nanomsg --without-targets --without-thrift"
+ARG BMV2_CONFIG_FLAGS="--with-pi --disable-elogger --without-nanomsg --without-thrift"
 ARG PI_CONFIG_FLAGS="--with-proto"
 ARG JOBS=2
 
