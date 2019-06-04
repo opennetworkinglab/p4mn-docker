@@ -8,6 +8,7 @@ env:
     - GRPC_VER: 1.19.1
     - STABLE_PI_COMMIT: 9f6c1f2
     - STABLE_BMV2_COMMIT: 8c6f852
+    - PI_CONFIGURE_FLAGS: "'--with-proto'"
   matrix:
     - LABEL: latest
       PI_COMMIT: master
