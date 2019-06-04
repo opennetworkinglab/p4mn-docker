@@ -41,5 +41,5 @@ script:
     --build-arg BMV2_COMMIT=$BMV2_COMMIT
     --build-arg PI_CONFIGURE_FLAGS="$PI_CONFIGURE_FLAGS"
     --build-arg BMV2_CONFIGURE_FLAGS="$BMV2_CONFIGURE_FLAGS"
-    - docker run --rm --entrypoint simple_switch_grpc p4mn-$LABEL --help
-    - docker run --rm --entrypoint mn p4mn-$LABEL --help
+  - docker run --rm --entrypoint simple_switch_grpc p4mn-$LABEL --help
+  - docker run --rm --entrypoint mn p4mn-$LABEL --help
