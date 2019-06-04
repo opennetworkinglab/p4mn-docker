@@ -1,4 +1,4 @@
-sudo: required
+language: generic
 
 services:
   - docker
@@ -33,16 +33,13 @@ env:
       BMV2_CONFIGURE_FLAGS=$BMV2_BASE_FLAGS $BMV2_NO_LOGGING_FLAGS
       TRAVIS_ALLOW_FAILURE=false
 
-jobs:
-  include:
-    - stage: build
-    - script: >
-        docker build
-        -t p4mn-$LABEL
-        --build-arg PI_COMMIT=$PI_COMMIT
-        --build-arg BMV2_COMMIT=$BMV2_COMMIT
-        --build-arg PI_CONFIGURE_FLAGS="$PI_CONFIGURE_FLAGS"
-        --build-arg BMV2_CONFIGURE_FLAGS="$BMV2_CONFIGURE_FLAGS"
-    - stage: test
-    - script: docker run --rm --entrypoint simple_switch_grpc p4mn-local --help
-    - script: docker run --rm --entrypoint mn p4mn-local --help
+script:
+  - >
+    docker build
+    -t p4mn-$LABEL
+    --build-arg PI_COMMIT=$PI_COMMIT
+    --build-arg BMV2_COMMIT=$BMV2_COMMIT
+    --build-arg PI_CONFIGURE_FLAGS="$PI_CONFIGURE_FLAGS"
+    --build-arg BMV2_CONFIGURE_FLAGS="$BMV2_CONFIGURE_FLAGS"
+    - docker run --rm --entrypoint simple_switch_grpc p4mn-$LABEL --help
+    - docker run --rm --entrypoint mn p4mn-$LABEL --help
