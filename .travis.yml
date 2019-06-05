@@ -52,8 +52,8 @@ install:
 
 script:
   # Build images. Without eval, build args are not escaped properly.
-  - eval "docker build --target builder -t $BUILDER_IMAGE_NAME $DOCKER_BUILD_ARGS ."
-  - eval "docker build --target runtime -t $RUNTIME_IMAGE_NAME $DOCKER_BUILD_ARGS ."
+  - eval "docker build --target builder --cache-from $DOCKER_REPO:$TAGNAME-builder -t $BUILDER_IMAGE_NAME $DOCKER_BUILD_ARGS ." || travis_terminate 1
+  - eval "docker build --target runtime --cache-from $BUILDER_IMAGE_NAME -t $RUNTIME_IMAGE_NAME $DOCKER_BUILD_ARGS ." || travis_terminate 1
   # Test that all shared objects are present.
   - docker run --rm --entrypoint simple_switch_grpc $RUNTIME_IMAGE_NAME --help || travis_terminate 1
   - docker run --rm --entrypoint mn $RUNTIME_IMAGE_NAME --help || travis_terminate 1
