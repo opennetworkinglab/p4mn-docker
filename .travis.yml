@@ -47,7 +47,6 @@ before_install:
 
 install:
   - docker pull $DOCKER_REPO:$TAGNAME-builder
-  - makedir -p $CACHE_DIR
   - if [ -f $CACHE_BUILDER_IMAGE ]; then docker load -i $CACHE_BUILDER_IMAGE; fi
   - if [ -f $CACHE_RUNTIME_IMAGE ]; then docker load -i $CACHE_RUNTIME_IMAGE; fi
 
@@ -56,6 +55,7 @@ script:
   - docker build --target runtime -t $RUNTIME_IMAGE_NAME $DOCKER_BUILD_ARGS .
   - docker run --rm --entrypoint simple_switch_grpc $RUNTIME_IMAGE_NAME --help
   - docker run --rm --entrypoint mn $RUNTIME_IMAGE_NAME --help
+  - mkdir -p $CACHE_DIR
   - docker save -o $CACHE_BUILDER_IMAGE $BUILDER_IMAGE_NAME
   - docker save -o $CACHE_RUNTIME_IMAGE $RUNTIME_IMAGE_NAME
 
