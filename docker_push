@@ -2,8 +2,8 @@
 
 echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
-docker tag p4mn:$TAGNAME $DOCKER_REPO:$TAGNAME
-docker push $DOCKER_REPO:$TAGNAME
+docker tag $LOCAL_RUNTIME_IMAGE $DOCKER_RUNTIME_IMAGE
+docker push $DOCKER_RUNTIME_IMAGE
 
-docker tag p4mn:$TAGNAME-builder $DOCKER_REPO:$TAGNAME-builder
-docker push $DOCKER_REPO:$TAGNAME-builder
+docker tag $LOCAL_BUILDER_IMAGE $DOCKER_BUILDER_IMAGE
+docker push $DOCKER_BUILDER_IMAGE
