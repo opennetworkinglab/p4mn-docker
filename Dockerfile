@@ -1,4 +1,4 @@
-ARG GRPC_VER=1.19.1
+ARG GRPC_VER=1.19.0
 ARG PI_COMMIT=master
 ARG BMV2_COMMIT=master
 ARG BMV2_CONFIGURE_FLAGS="--with-pi --disable-elogger --without-nanomsg --without-thrift"

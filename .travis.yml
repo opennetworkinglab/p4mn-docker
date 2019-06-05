@@ -5,7 +5,7 @@ services:
 
 env:
   global:
-    - GRPC_VER: 1.19.1
+    - GRPC_VER: 1.19.0
     - STABLE_PI_COMMIT: 9f6c1f2
     - STABLE_BMV2_COMMIT: 8c6f852
     - LATEST_PI_COMMIT: "`wget -qO- http://api.github.com/repos/p4lang/PI/commits/master | grep -m1 '\"sha\"' | cut -d '\"' -f4 | cut -c1-7`"
