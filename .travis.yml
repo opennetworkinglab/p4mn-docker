@@ -33,10 +33,14 @@ env:
       BMV2_CONFIGURE_FLAGS: "'--with-pi --disable-elogger --without-nanomsg --without-thrift --disable-logging-macros'"
       TRAVIS_ALLOW_FAILURE: false
 
+install:
+  - docker pull $DOCKER_REPO:$TAGNAME-builder
+
 script:
   - >
     docker build
     --target builder
+    --cache-from $DOCKER_REPO:$TAGNAME-builder
     -t p4mn:$TAGNAME-builder
     --build-arg PI_COMMIT=$PI_COMMIT
     --build-arg BMV2_COMMIT=$BMV2_COMMIT
