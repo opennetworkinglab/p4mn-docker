@@ -8,24 +8,26 @@ env:
     - GRPC_VER: 1.19.1
     - STABLE_PI_COMMIT: 9f6c1f2
     - STABLE_BMV2_COMMIT: 8c6f852
+    - LATEST_PI_COMMIT: "`wget -qO- http://api.github.com/repos/p4lang/PI/commits/master | grep -m1 '\"sha\"' | cut -d '\"' -f4 | cut -c1-7`"
+    - LATEST_BMV2_COMMIT: "`wget -qO- http://api.github.com/repos/p4lang/behavioral-model/commits/master | grep -m1 '\"sha\"' | cut -d '\"' -f4 | cut -c1-7`"
     - PI_CONFIGURE_FLAGS: "'--with-proto'"
   matrix:
-    - LABEL: latest
-      PI_COMMIT: master
-      BMV2_COMMIT: master
+    - TAGNAME: latest
+      PI_COMMIT: $LATEST_PI_COMMIT
+      BMV2_COMMIT: $LATEST_BMV2_COMMIT
       BMV2_CONFIGURE_FLAGS: "'--with-pi --disable-elogger --without-nanomsg --without-thrift'"
       TRAVIS_ALLOW_FAILURE: true
-    - LABEL: latest-no-logging
-      PI_COMMIT: master
-      BMV2_COMMIT: master
+    - TAGNAME: latest-no-logging
+      PI_COMMIT: $LATEST_PI_COMMIT
+      BMV2_COMMIT: $LATEST_BMV2_COMMIT
       BMV2_CONFIGURE_FLAGS: "'--with-pi --disable-elogger --without-nanomsg --without-thrift --disable-logging-macros'"
       TRAVIS_ALLOW_FAILURE: true
-    - LABEL: stable
+    - TAGNAME: stable
       PI_COMMIT: $STABLE_PI_COMMIT
       BMV2_COMMIT: $STABLE_BMV2_COMMIT
       BMV2_CONFIGURE_FLAGS: "'--with-pi --disable-elogger --without-nanomsg --without-thrift'"
       TRAVIS_ALLOW_FAILURE: false
-    - LABEL: stable-no-logging
+    - TAGNAME: stable-no-logging
       PI_COMMIT: $STABLE_PI_COMMIT
       BMV2_COMMIT: $STABLE_BMV2_COMMIT
       BMV2_CONFIGURE_FLAGS: "'--with-pi --disable-elogger --without-nanomsg --without-thrift --disable-logging-macros'"
@@ -34,17 +36,17 @@ env:
 script:
   - >
     docker build
-    -t p4mn-$LABEL
+    -t p4mn:$TAGNAME
     --build-arg PI_COMMIT=$PI_COMMIT
     --build-arg BMV2_COMMIT=$BMV2_COMMIT
     --build-arg PI_CONFIGURE_FLAGS="$PI_CONFIGURE_FLAGS"
     --build-arg BMV2_CONFIGURE_FLAGS="$BMV2_CONFIGURE_FLAGS" .
-  - docker run --rm --entrypoint simple_switch_grpc p4mn-$LABEL --help
-  - docker run --rm --entrypoint mn p4mn-$LABEL --help
-  - docker tag p4mn-$LABEL $DOCKER_REPO:$LABEL
+  - docker run --rm --entrypoint simple_switch_grpc p4mn:$TAGNAME --help
+  - docker run --rm --entrypoint mn p4mn:$TAGNAME --help
+  - docker tag p4mn:$TAGNAME $DOCKER_REPO:$TAGNAME
 
 deploy:
   provider: script
-  script: bash docker_push $DOCKER_REPO:$LABEL
+  script: bash docker_push $DOCKER_REPO:$TAGNAME
   on:
     branch: master
