@@ -149,7 +149,7 @@ RUN cp --parents --preserve=links /usr/local/lib/libbmpi.so.* /output
 # simple control apps.
 RUN cp --parents -r /usr/local/lib/python2.7/dist-packages/p4 /output
 RUN cp --parents -r /usr/local/lib/python2.7/dist-packages/google /output
-RUN pip install --no-cache-dir --root /output grpcio==1.9.1
+RUN pip install --no-cache-dir --root /output grpcio==$GRPC_VER
 
 # Final stage, runtime.
 FROM bitnami/minideb:stretch as runtime
@@ -180,6 +180,7 @@ ENV RUNTIME_DEPS \
     procps \
     iperf \
     telnet \
+    python-setuptools \
     python-pexpect \
     tcpdump \
     libboost-filesystem1.62.0 \
