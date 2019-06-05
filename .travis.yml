@@ -5,6 +5,7 @@ services:
 
 env:
   global:
+    - CACHE_DIR: $HOME/.cache/docker
     - GRPC_VER: 1.19.1
     - STABLE_PI_COMMIT: 9f6c1f2
     - STABLE_BMV2_COMMIT: 8c6f852
@@ -33,30 +34,32 @@ env:
       BMV2_CONFIGURE_FLAGS: "'--with-pi --disable-elogger --without-nanomsg --without-thrift --disable-logging-macros'"
       TRAVIS_ALLOW_FAILURE: false
 
+cache:
+  directories:
+  - $CACHE_DIR
+
+before_install:
+  - export RUNTIME_IMAGE_NAME=p4mn-$TAGNAME
+  - export BUILDER_IMAGE_NAME=$RUNTIME_IMAGE_NAME-builder
+  - export CACHE_BUILDER_IMAGE=$CACHE_DIR/$BUILDER_IMAGE_NAME.tar
+  - export CACHE_RUNTIME_IMAGE=$CACHE_DIR/$RUNTIME_IMAGE_NAME.tar
+  - export DOCKER_BUILD_ARGS="--build-arg PI_COMMIT=$PI_COMMIT --build-arg BMV2_COMMIT=$BMV2_COMMIT --build-arg PI_CONFIGURE_FLAGS=\"$PI_CONFIGURE_FLAGS\" --build-arg BMV2_CONFIGURE_FLAGS=\"$BMV2_CONFIGURE_FLAGS\""
+
 install:
   - docker pull $DOCKER_REPO:$TAGNAME-builder
+  - if [ -f $CACHE_BUILDER_IMAGE ]; then docker load -i $CACHE_BUILDER_IMAGE; fi
+  - if [ -f $CACHE_RUNTIME_IMAGE ]; then docker load -i $CACHE_RUNTIME_IMAGE; fi
 
 script:
-  - >
-    docker build
-    --target builder
-    --cache-from $DOCKER_REPO:$TAGNAME-builder
-    -t p4mn:$TAGNAME-builder
-    --build-arg PI_COMMIT=$PI_COMMIT
-    --build-arg BMV2_COMMIT=$BMV2_COMMIT
-    --build-arg PI_CONFIGURE_FLAGS="$PI_CONFIGURE_FLAGS"
-    --build-arg BMV2_CONFIGURE_FLAGS="$BMV2_CONFIGURE_FLAGS" .
-  - >
-    docker build
-    --target runtime
-    --cache-from p4mn:$TAGNAME-builder
-    -t p4mn:$TAGNAME
-    --build-arg PI_COMMIT=$PI_COMMIT
-    --build-arg BMV2_COMMIT=$BMV2_COMMIT
-    --build-arg PI_CONFIGURE_FLAGS="$PI_CONFIGURE_FLAGS"
-    --build-arg BMV2_CONFIGURE_FLAGS="$BMV2_CONFIGURE_FLAGS" .
-  - docker run --rm --entrypoint simple_switch_grpc p4mn:$TAGNAME --help
-  - docker run --rm --entrypoint mn p4mn:$TAGNAME --help
+  - docker build --target builder -t $BUILDER_IMAGE_NAME $DOCKER_BUILD_ARGS .
+  - docker build --target runtime -t $RUNTIME_IMAGE_NAME $DOCKER_BUILD_ARGS .
+  - docker run --rm --entrypoint simple_switch_grpc $RUNTIME_IMAGE_NAME --help
+  - docker run --rm --entrypoint mn $RUNTIME_IMAGE_NAME --help
+
+after_success:
+  - makedir -p $CACHE_DIR
+  - docker save -o $CACHE_BUILDER_IMAGE $BUILDER_IMAGE_NAME
+  - docker save -o $CACHE_RUNTIME_IMAGE $RUNTIME_IMAGE_NAME
 
 deploy:
   provider: script
