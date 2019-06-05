@@ -144,6 +144,13 @@ RUN cp --parents --preserve=links /usr/local/lib/libpiprotogrpc.so.* /output
 RUN cp --parents --preserve=links /usr/local/lib/libbm_grpc_dataplane.so.* /output
 RUN cp --parents --preserve=links /usr/local/lib/libbmpi.so.* /output
 
+# This is not required for Mininet but it's useful for running Python-scripts
+# requiring P4Runtime gRPC bindings inside the container, e.g. PTF tests or
+# simple control apps.
+RUN cp --parents -r /usr/local/lib/python2.7/dist-packages/p4 /output
+RUN cp --parents -r /usr/local/lib/python2.7/dist-packages/google /output
+RUN pip install --no-cache-dir --root /output grpcio==1.9.1
+
 # Final stage, runtime.
 FROM bitnami/minideb:stretch as runtime
 
@@ -185,7 +192,6 @@ RUN install_packages $RUNTIME_DEPS
 
 COPY --from=builder /output /
 RUN ldconfig
-ENV PYTHONPATH "${PYTHONPATH}:/usr/lib/python2.7/site-packages/"
 
 WORKDIR /root
 COPY bmv2.py .
