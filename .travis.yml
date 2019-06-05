@@ -5,7 +5,6 @@ services:
 
 env:
   global:
-    - CACHE_DIR: $HOME/.cache/docker
     - GRPC_VER: 1.19.1
     - STABLE_PI_COMMIT: 9f6c1f2
     - STABLE_BMV2_COMMIT: 8c6f852
@@ -33,10 +32,6 @@ env:
       BMV2_COMMIT: $STABLE_BMV2_COMMIT
       BMV2_CONFIGURE_FLAGS: "'--with-pi --disable-elogger --without-nanomsg --without-thrift --disable-logging-macros'"
       TRAVIS_ALLOW_FAILURE: false
-
-cache:
-  directories:
-  - $CACHE_DIR
 
 before_install:
   - export LOCAL_RUNTIME_IMAGE=p4mn-$TAGNAME
