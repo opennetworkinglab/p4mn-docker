@@ -419,7 +419,7 @@ class ONOSStratumSwitch(ONOSBmv2Switch):
 
 # Exports for bin/mn
 switches = {
-    'ss_grpc': ONOSBmv2Switch,
+    'simple_switch_grpc': ONOSBmv2Switch,
     'stratum_bmv2': ONOSStratumSwitch,
 }
 hosts = {'onoshost': ONOSHost}
