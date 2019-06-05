@@ -36,6 +36,16 @@ env:
 script:
   - >
     docker build
+    --target builder
+    -t p4mn:$TAGNAME-builder
+    --build-arg PI_COMMIT=$PI_COMMIT
+    --build-arg BMV2_COMMIT=$BMV2_COMMIT
+    --build-arg PI_CONFIGURE_FLAGS="$PI_CONFIGURE_FLAGS"
+    --build-arg BMV2_CONFIGURE_FLAGS="$BMV2_CONFIGURE_FLAGS" .
+  - >
+    docker build
+    --target runtime
+    --cache-from p4mn:$TAGNAME-builder
     -t p4mn:$TAGNAME
     --build-arg PI_COMMIT=$PI_COMMIT
     --build-arg BMV2_COMMIT=$BMV2_COMMIT
@@ -43,10 +53,9 @@ script:
     --build-arg BMV2_CONFIGURE_FLAGS="$BMV2_CONFIGURE_FLAGS" .
   - docker run --rm --entrypoint simple_switch_grpc p4mn:$TAGNAME --help
   - docker run --rm --entrypoint mn p4mn:$TAGNAME --help
-  - docker tag p4mn:$TAGNAME $DOCKER_REPO:$TAGNAME
 
 deploy:
   provider: script
-  script: bash docker_push $DOCKER_REPO:$TAGNAME
+  script: bash docker_push
   on:
     branch: master

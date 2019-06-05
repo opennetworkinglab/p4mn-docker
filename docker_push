@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 
 echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-docker push ${1}
+
+docker tag p4mn:$TAGNAME $DOCKER_REPO:$TAGNAME
+docker push $DOCKER_REPO:$TAGNAME
+
+docker tag p4mn:$TAGNAME-builder $DOCKER_REPO:$TAGNAME-builder
+docker push $DOCKER_REPO:$TAGNAME-builder
