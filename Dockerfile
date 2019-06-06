@@ -124,9 +124,9 @@ RUN mkdir -p /output/usr/local/lib
 
 RUN cp --parents /usr/local/bin/simple_switch_grpc /output
 
-# protobuf
+# Protobuf
 RUN cp --parents --preserve=links /usr/local/lib/libprotobuf.so.* /output
-# grpc
+# gRPC
 RUN cp --parents --preserve=links /usr/local/lib/libgpr.so.* /output
 RUN cp --parents --preserve=links /usr/local/lib/libgrpc++.so.* /output
 RUN cp --parents --preserve=links /usr/local/lib/libgrpc++_reflection.so.* /output
@@ -144,11 +144,28 @@ RUN cp --parents --preserve=links /usr/local/lib/libpiprotogrpc.so.* /output
 RUN cp --parents --preserve=links /usr/local/lib/libbm_grpc_dataplane.so.* /output
 RUN cp --parents --preserve=links /usr/local/lib/libbmpi.so.* /output
 
-# This is not required for Mininet but it's useful for running Python-scripts
-# requiring P4Runtime gRPC bindings inside the container, e.g. PTF tests or
-# simple control apps.
-RUN pip install --no-cache-dir --root /output grpcio==$GRPC_VER
+# We now install Python bindings to use P4Runtime. This is not required to run
+# Mininet but it's useful for running Python scripts using P4Runtime, e.g. PTF
+# tests or Python-based control planes. As before, we put the strict necessary
+# in /output.
+
+# Protobuf
+WORKDIR /tmp/grpc/third_party/protobuf/python
+RUN python setup.py install --root /output --cpp_implementation
+
+# gRPC
+WORKDIR /tmp/grpc
+# Install build dependencies from requirements.txt, but not protobuf, that's
+# only required at runtime and we just installed it
+RUN cat requirements.txt | grep -v protobuf | grep -v "#" | xargs pip install
+# Build and install gRPC Python bindings in /output
+RUN GRPC_PYTHON_BUILD_WITH_CYTHON=1 pip install --root /output .
+# Install again requirements in /output for runtime
+RUN cat requirements.txt | grep -v protobuf | grep -v "#" | xargs pip install --root /output
+
+# Finally, copy to /ouput P4Runtime Python bindings installed by PI...
 RUN cp --parents -r /usr/local/lib/python2.7/dist-packages/p4/* /output
+# ...and Google API ones (e.g. Status) needed by P4Runtime.
 RUN cp --parents -r /usr/local/lib/python2.7/dist-packages/google/* /output
 
 # Final stage, runtime.
