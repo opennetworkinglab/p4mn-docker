@@ -161,7 +161,7 @@ RUN cat requirements.txt | grep -v protobuf | grep -v "#" | xargs pip install
 # Build and install gRPC Python bindings in /output
 RUN GRPC_PYTHON_BUILD_WITH_CYTHON=1 pip install --root /output .
 # Install again requirements in /output for runtime
-RUN cat requirements.txt | grep -v protobuf | grep -v "#" | xargs pip install --root /output
+RUN cat requirements.txt | grep -v protobuf | grep -v "#" | xargs pip install --ignore-installed --root /output
 
 # Finally, copy to /ouput P4Runtime Python bindings installed by PI...
 RUN cp --parents -r /usr/local/lib/python2.7/dist-packages/p4/* /output
