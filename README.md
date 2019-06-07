@@ -3,7 +3,7 @@
 Docker image that can execute a mininet emulated network of BMv2 virtual
 switches, controlled by an external SDN controller via P4Runtime.
 
-[![Build Status](https://travis-ci.org/ccascone/p4mn-docker.svg?branch=master)](https://travis-ci.org/ccascone/p4mn-docker)
+[![Build Status](https://travis-ci.org/opennetworkinglab/p4mn-docker.svg?branch=master)](https://travis-ci.org/opennetworkinglab/p4mn-docker)
 [![](https://images.microbadger.com/badges/version/opennetworking/p4mn:stable.svg)](https://microbadger.com/images/opennetworking/p4mn:stable)
 [![](https://images.microbadger.com/badges/image/opennetworking/p4mn:stable.svg)](https://microbadger.com/images/opennetworking/p4mn:stable)
 
