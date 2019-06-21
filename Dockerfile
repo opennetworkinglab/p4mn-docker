@@ -57,6 +57,11 @@ RUN install_packages $BUILD_DEPS
 ARG GRPC_VER
 ARG JOBS
 
+# Install extra PIP dependencies
+ENV PIP_DEPS \
+    ipaddress
+RUN pip install --no-cache-dir --root /output $PIP_DEPS
+
 # Install protobuf and grpc.
 RUN echo "*** Building gRPC v$GRPC_VER"
 RUN git clone https://github.com/grpc/grpc.git /tmp/grpc && \
@@ -211,6 +216,7 @@ ENV RUNTIME_DEPS \
     psmisc \
     procps \
     iperf \
+    arping \
     telnet \
     python-setuptools \
     python-pexpect \
