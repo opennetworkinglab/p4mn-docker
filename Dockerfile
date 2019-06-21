@@ -54,6 +54,11 @@ ENV BUILD_DEPS \
     unzip
 RUN install_packages $BUILD_DEPS
 
+# Install extra PIP dependencies
+ENV PIP_DEPS \
+    ipaddress
+RUN pip install --no-cache-dir --root /output $PIP_DEPS
+
 ARG GRPC_VER
 ARG JOBS
 
@@ -211,6 +216,7 @@ ENV RUNTIME_DEPS \
     psmisc \
     procps \
     iperf \
+    arping \
     telnet \
     python-setuptools \
     python-pexpect \
