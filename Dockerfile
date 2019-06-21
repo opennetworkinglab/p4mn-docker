@@ -54,13 +54,13 @@ ENV BUILD_DEPS \
     unzip
 RUN install_packages $BUILD_DEPS
 
-ARG GRPC_VER
-ARG JOBS
-
 # Install extra PIP dependencies
 ENV PIP_DEPS \
     ipaddress
 RUN pip install --no-cache-dir --root /output $PIP_DEPS
+
+ARG GRPC_VER
+ARG JOBS
 
 # Install protobuf and grpc.
 RUN echo "*** Building gRPC v$GRPC_VER"
