@@ -1,0 +1,100 @@
+# This is a basic workflow that is triggered periodically on PR and post-merge,
+# building docker images for p4mn.
+
+name: Build-P4mn-Image
+
+on:
+  schedule:
+    - cron:  '0 0 * * *' # start daily at 00:00
+  push:
+    branches:
+      - master
+
+jobs:
+  solve_env:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Find latest behavioral-model commit
+        id: eval
+        run: |
+          echo "::set-output name=BMV2_COMMIT::`wget -qO- http://api.github.com/repos/p4lang/behavioral-model/commits/master | grep -m1 '\"sha\"' | cut -d '\"' -f4 | cut -c1-7`"
+          echo "::set-output name=PI_COMMIT::`wget -qO- http://api.github.com/repos/p4lang/PI/commits/master | grep -m1 '\"sha\"' | cut -d '\"' -f4 | cut -c1-7`"
+    outputs:
+      LATEST_BMV2_COMMIT: ${{ steps.eval.outputs.BMV2_COMMIT }}
+      LATEST_PI_COMMIT: ${{ steps.eval.outputs.PI_COMMIT }}
+
+
+  build_matrix:
+    needs: solve_env
+    runs-on: ubuntu-20.04
+    env:
+      JOBS: '2'
+      DOCKER_REPO: "opennetworking/p4mn"
+      GRPC_VER: 1.19.0
+      PI_CONFIGURE_FLAGS: "--with-proto"
+    strategy:
+      fail-fast: false # if enabled, in case of error in a matrix job, all the other jobs will be aborted.
+      matrix:
+        include:
+          - TAGNAME: latest
+            PI_COMMIT: ${{ needs.solve_env.outputs.LATEST_PI_COMMIT }}
+            BMV2_COMMIT: ${{ needs.solve_env.outputs.LATEST_BMV2_COMMIT }}
+            BMV2_CONFIGURE_FLAGS: "--with-pi --disable-elogger --without-nanomsg --without-thrift"
+          - TAGNAME: latest-no-logging
+            PI_COMMIT: ${{ needs.solve_env.outputs.LATEST_PI_COMMIT }}
+            BMV2_COMMIT: ${{ needs.solve_env.outputs.LATEST_BMV2_COMMIT }}
+            BMV2_CONFIGURE_FLAGS: "--with-pi --disable-elogger --without-nanomsg --without-thrift --disable-logging-macros"
+          - TAGNAME: stable
+            PI_COMMIT: 9f6c1f2
+            BMV2_COMMIT: 8c6f852
+            BMV2_CONFIGURE_FLAGS: "--with-pi --disable-elogger --without-nanomsg --without-thrift --disable-logging-macros"
+          - TAGNAME: stable-no-logging
+            PI_COMMIT: 9f6c1f2
+            BMV2_COMMIT: 8c6f852
+            BMV2_CONFIGURE_FLAGS: "--with-pi --disable-elogger --without-nanomsg --without-thrift --disable-logging-macros"
+
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and export to Docker for testing.
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: false
+          load: true # load the builded image to local docker instance. Needed for testing step.
+          cache-from: "${{ env.DOCKER_REPO }}:${{ matrix.TAGNAME }}"
+          build-args: |
+            "JOBS=${{ env.JOBS }}"
+            "GRPC_VER=${{ env.GRPC_VER }}"
+            "PI_COMMIT=${{ matrix.PI_COMMIT }}"
+            "BMV2_COMMIT=${{ matrix.BMV2_COMMIT }}"
+            "PI_CONFIGURE_FLAGS=${{ env.PI_CONFIGURE_FLAGS }}"
+            "BMV2_CONFIGURE_FLAGS=${{ matrix.BMV2_CONFIGURE_FLAGS }}"
+          tags: "${{ env.DOCKER_REPO }}:p4mn-${{ matrix.TAGNAME }}" # Local Runtime image
+          target: "runtime"
+
+      - name: Test docker build
+        run: |
+          docker run --rm ${{ env.DOCKER_REPO }}:p4mn-${{ matrix.TAGNAME }} simple_switch_grpc --help
+          docker run --rm ${{ env.DOCKER_REPO }}:p4mn-${{ matrix.TAGNAME }} mn --help
+      - name: Push to registry
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: "${{ env.DOCKER_REPO }}:${{ matrix.TAGNAME }}"
+          build-args: |
+            "JOBS=${{ env.JOBS }}"
+            "GRPC_VER=${{ env.GRPC_VER }}"
+            "PI_COMMIT=${{ matrix.PI_COMMIT }}"
+            "BMV2_COMMIT=${{ matrix.BMV2_COMMIT }}"
+            "PI_CONFIGURE_FLAGS=${{ env.PI_CONFIGURE_FLAGS }}"
+            "BMV2_CONFIGURE_FLAGS=${{ matrix.BMV2_CONFIGURE_FLAGS }}"
+          target: "runtime"

@@ -25,16 +25,10 @@ macros in BMv2 to improve packet forwarding performance:
 * `opennetworking/p4mn:latest-no-logging`
 * `opennetworking/p4mn:stable-no-logging`
 
-## Status [![Build Status](https://travis-ci.org/opennetworkinglab/p4mn-docker.svg?branch=master)][Travis]
+## Status [![Build Status](https://github.com/opennetworkinglab/p4mn-docker/actions/workflows/main.yml/badge.svg)](https://github.com/opennetworkinglab/p4mn-docker/actions/workflows/main.yml)
 
-Images are built daily using [Travis CI][Travis] and pushed to 
+Images are built daily using [Github Actions][GH Actions] and pushed to
 [Docker Hub][Docker Hub].
-
-[![](https://images.microbadger.com/badges/version/opennetworking/p4mn:latest.svg)](https://microbadger.com/images/opennetworking/p4mn:latest)
-[![](https://images.microbadger.com/badges/image/opennetworking/p4mn:latest.svg)](https://microbadger.com/images/opennetworking/p4mn:latest)
-
-[![](https://images.microbadger.com/badges/version/opennetworking/p4mn:stable.svg)](https://microbadger.com/images/opennetworking/p4mn:stable)
-[![](https://images.microbadger.com/badges/image/opennetworking/p4mn:stable.svg)](https://microbadger.com/images/opennetworking/p4mn:stable)
 
 ## Steps to run p4mn
 
