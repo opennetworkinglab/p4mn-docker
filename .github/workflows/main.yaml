@@ -7,6 +7,8 @@ on:
   schedule:
     - cron:  '0 0 * * *' # start daily at 00:00
   pull_request:
+    branches:
+      - "*"
   push:
     branches:
       - master
