@@ -15,13 +15,13 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Find latest behavioral-model commit
-        id: eval_bmv2
+        id: eval
         run: |
           echo "::set-output name=BMV2_COMMIT::`wget -qO- http://api.github.com/repos/p4lang/behavioral-model/commits/master | grep -m1 '\"sha\"' | cut -d '\"' -f4 | cut -c1-7`"
           echo "::set-output name=PI_COMMIT::`wget -qO- http://api.github.com/repos/p4lang/PI/commits/master | grep -m1 '\"sha\"' | cut -d '\"' -f4 | cut -c1-7`"
     outputs:
-      LATEST_BMV2_COMMIT: ${{ steps.eval_bmv2.outputs.BMV2_COMMIT }}
-      LATEST_PI_COMMIT: ${{ steps.eval_pi.outputs.PI_COMMIT }}
+      LATEST_BMV2_COMMIT: ${{ steps.eval.outputs.BMV2_COMMIT }}
+      LATEST_PI_COMMIT: ${{ steps.eval.outputs.PI_COMMIT }}
 
 
   build_matrix:
