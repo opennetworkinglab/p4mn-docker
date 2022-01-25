@@ -1,10 +1,15 @@
-# This is a basic workflow that is triggered periodically, building docker images for p4mn
+# This is a basic workflow that is triggered periodically on PR and post-merge,
+# building docker images for p4mn.
 
 name: Build-P4mn-Image
 
 on:
   schedule:
     - cron:  '0 0 * * *' # start daily at 00:00
+  pull_request:
+  push:
+    branches:
+      - master
 
 jobs:
   solve_env:
