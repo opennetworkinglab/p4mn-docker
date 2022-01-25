@@ -79,13 +79,13 @@ jobs:
             "BMV2_COMMIT=${{ matrix.BMV2_COMMIT }}"
             "PI_CONFIGURE_FLAGS=${{ env.PI_CONFIGURE_FLAGS }}"
             "BMV2_CONFIGURE_FLAGS=${{ matrix.BMV2_CONFIGURE_FLAGS }}"
-          tags: "${{ env.DOCKER_REPO }}:p4c-${{ matrix.TAGNAME }}" # Local Runtime image
+          tags: "${{ env.DOCKER_REPO }}:p4mn-${{ matrix.TAGNAME }}" # Local Runtime image
           target: "runtime"
 
       - name: Test docker build
         run: |
-          docker run --rm ${{ env.DOCKER_REPO }}:p4c-${{ matrix.TAGNAME }} simple_switch_grpc--help
-          docker run --rm ${{ env.DOCKER_REPO }}:p4c-${{ matrix.TAGNAME }} mn --help
+          docker run --rm ${{ env.DOCKER_REPO }}:p4mn-${{ matrix.TAGNAME }} simple_switch_grpc --help
+          docker run --rm ${{ env.DOCKER_REPO }}:p4mn-${{ matrix.TAGNAME }} mn --help
       - name: Push to registry
         uses: docker/build-push-action@v2
         with:
