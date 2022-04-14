@@ -14,8 +14,9 @@
 
 # Default build args.
 ARG GRPC_VER=1.19.0
-ARG PI_COMMIT=master
-ARG BMV2_COMMIT=master
+ARG PI_COMMIT=main
+ARG BMV2_COMMIT=main
+ARG TAGNAME=latest
 ARG BMV2_CONFIGURE_FLAGS="--with-pi --disable-elogger --without-nanomsg --without-thrift"
 ARG PI_CONFIGURE_FLAGS="--with-proto"
 ARG JOBS=2
@@ -117,9 +118,12 @@ RUN make -j${JOBS}
 RUN make install
 RUN ldconfig
 
+ARG TAGNAME
+
 WORKDIR /tmp/bmv2/targets/simple_switch_grpc
-RUN ./autogen.sh
-RUN ./configure
+
+RUN if [ ${TAGNAME} != "latest" ]; then ./autogen.sh; fi
+RUN if [ ${TAGNAME} != "latest" ]; then ./configure; fi
 RUN make -j${JOBS}
 RUN make install
 RUN ldconfig
