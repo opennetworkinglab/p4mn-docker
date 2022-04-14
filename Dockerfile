@@ -122,8 +122,8 @@ ARG TAGNAME
 
 WORKDIR /tmp/bmv2/targets/simple_switch_grpc
 
-RUN if [ ${TAGNAME} != *"latest"* ]; then ./autogen.sh; fi
-RUN if [ ${TAGNAME} != *"latest"* ]; then ./configure; fi
+RUN if echo ${TAGNAME} | grep -v "latest"; then ./autogen.sh; fi
+RUN if echo ${TAGNAME} | grep -v "latest"; then ./configure; fi
 RUN make -j${JOBS}
 RUN make install
 RUN ldconfig
