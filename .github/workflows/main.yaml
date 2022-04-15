@@ -84,8 +84,8 @@ jobs:
 
       - name: Test docker build
         run: |
-          docker run --rm ${{ env.DOCKER_REPO }}:p4mn-${{ matrix.TAGNAME }} simple_switch_grpc --help
-          docker run --rm ${{ env.DOCKER_REPO }}:p4mn-${{ matrix.TAGNAME }} mn --help
+          docker run --rm --entrypoint simple_switch_grpc ${{ env.DOCKER_REPO }}:p4mn-${{ matrix.TAGNAME }} --help
+          docker run --rm ${{ env.DOCKER_REPO }}:p4mn-${{ matrix.TAGNAME }} --help
       - name: Push to registry
         uses: docker/build-push-action@v2
         if: ${{ github.event_name != 'pull_request' }}
