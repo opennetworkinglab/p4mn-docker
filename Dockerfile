@@ -138,6 +138,8 @@ RUN curl -L https://github.com/mininet/mininet/tarball/master | \
 RUN mkdir -p /output
 RUN PREFIX=/output make install-mnexec install-manpages
 RUN python setup.py install --root /output
+# Install `m` utility so user can attach to a mininet host directly
+RUN cp util/m /output/bin/m && sed -i 's#sudo##g' /output/bin/m
 
 # From `ldd /usr/local/bin/simple_switch_grpc`, we put aside just the strict
 # necessary to run simple_switch_grpc, i.e. the binary and some (not all) of the
@@ -238,9 +240,10 @@ RUN ldconfig
 
 WORKDIR /root
 COPY bmv2.py .
+ENV PYTHONPATH $PYTHONPATH:/root
 
 # Expose one port per switch (gRPC server), hence the number of exposed ports
 # limit the number of switches that can be controlled from an external P4Runtime
 # controller.
 EXPOSE 50001-50999
-ENTRYPOINT ["mn", "--custom", "bmv2.py", "--switch", "simple_switch_grpc", "--controller", "none"]
+ENTRYPOINT ["mn", "--custom", "/root/bmv2.py", "--switch", "simple_switch_grpc", "--host", "onoshost", "--controller", "none"]
